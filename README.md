@@ -1,16 +1,23 @@
-# VizEmbedding
+# VizEmb
 
-VizEmbedding is a data visualization tool allows users to explore connections betewen items in any kind of database. The tool casts rich statical and semantic data into an embedding space and allows users to explore dimensions along which they want to visualize connections.
+VizEmb is a data visualization tool allows users to explore connections betewen items in any kind of database. The tool casts rich statical and semantic data into an embedding space and allows users to explore dimensions along which they want to visualize connections.
 
 Examples of embedding space dimensions include semantics (text and natural language meaning), date / time, location, and other calculated metrics.
 
 ## Database Structure
 
-VizEmbedding works for any data formatted with the simple schema:
+VizEmb works for any data formatted with the simple schema:
 | Item Title | Item Property #1 | Item Property #2 | Item Property #n |
 | ---- | ---- | ---- | ---- |
 | ... | ... | ... | ... |
 
+## Usage
+
+1. Make sure your database is in a supported format.
+2. Load your database into the data directory, or via the web app.
+3. Select the properties you would like to include in your visualization.
+4. Generate embeddings.
+5. Use the parameter module, filtering module, and comparison module to manipulate your visualization as desired.
 
 ## Software Architecture
 
@@ -28,9 +35,7 @@ VizEmbedding works for any data formatted with the simple schema:
     * Selected item box that displays data on clicked items
 
 **Backend components:**
-* API client to pull data from web databases
 * Data processer to standardize data
 * Semantic embedder to calculate embeddings for semantic data
 * Quantitative embedder to calculate embeddings for quantitative data
 * General embedder to integrate embeddings for all data
-* Network generator to generate network data from embeddings 
