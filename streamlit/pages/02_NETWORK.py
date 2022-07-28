@@ -93,7 +93,7 @@ else:
 
     with st.spinner("Calculating embeddings..."):
 
-        # # @st.cache
+        # @st.cache
         def calculate_default_embeddings():
             thisVizEmbData.compose_default_embedding()
         calculate_default_embeddings()

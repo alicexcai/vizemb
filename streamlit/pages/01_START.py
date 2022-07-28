@@ -12,7 +12,7 @@ thisVizEmbData.project_name = st.text_input("Enter your project name:", thisVizE
 
 ### TEMP FOR DEVELOPMENT ###
 uploaded_file = True
-thisVizEmbData.db_file = "/Users/alicecai/Desktop/vizemb/backend/data/reduced_data.csv"
+thisVizEmbData.db_file = "/Users/alicecai/Downloads/Database.csv"
 ### TEMP FOR DEVELOPMENT ###
 
 # save uploaded file to global data state
