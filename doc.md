@@ -1,7 +1,9 @@
 # documentation
 
 TODO
-* create client
-* create embeddings module
-* create frontend app
-* improve aesthetics
+* specified embeddings
+* statistics
+* comparison
+* export work
+* improve aesthetics - make d3js style
+* add d3js integration to produce fast graphics
