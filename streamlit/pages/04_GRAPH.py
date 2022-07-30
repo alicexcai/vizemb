@@ -1,7 +1,6 @@
 import streamlit as st
 from modules.VizEmb import *
 import plotly.express as px
-import pandas as pd
 
 st.markdown("""
 # GRAPH

@@ -1,8 +1,5 @@
 import streamlit as st
 from modules.VizEmb import *
-import plotly.express as px
-import tensorflow as tf
-
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 

@@ -15,7 +15,6 @@ else:
     parameter_list = thisVizEmbData.df.columns.tolist()
     thisVizEmbData.get_colvalues("title")
     thisVizEmbData.parse_cat_dfs()
-    # st.write(thisVizEmbData.colvalue_df["title"]["[title] TITLE"].tolist())
     item_dict = {value: i for i, value in enumerate(thisVizEmbData.colvalue_df["title"]["[title] TITLE"].tolist())}
     properties = list(thisVizEmbData.properties["sem"]) + list(thisVizEmbData.properties["cat"]) + list(thisVizEmbData.properties["quant"])
 
@@ -24,7 +23,6 @@ else:
         with st.spinner("Calculating embeddings..."):
             thisVizEmbData.compose_default_embedding()
             thisVizEmbData.reduce2oned_embedding_df()
-            # thisVizEmbData.reduce2twod_embedding_df(thisVizEmbData.default_embedding_df, weights = "default")
             st.success("Embeddings generated.")
 
     # initialize session state for generated to false
@@ -34,7 +32,6 @@ else:
     if st.button("Generate embeddings for comparison"):
         generate_default_embeddings()
         st.session_state.generated = True
-
 
     # search_params.item_names = st.selectbox("Select item names", thisVizEmbData.colvalue_df["TITLE"])
     item1 = st.selectbox("Select first item", item_dict.keys())
@@ -49,23 +46,13 @@ else:
     if st.session_state.generated == True:
 
         # similarity plotly graph 
-        # item1_dict = {value: thisVizEmbData.oned_embedding_df[prop][index1] for prop in properties}
         item1_dict = dict(value=[thisVizEmbData.oned_embedding_df[prop][index1] for prop in properties], stage=properties)
-        # item1_dict["stage"] = properties
-        # item1_dict["title"] = item1
-
-        # item2_dict = {value: thisVizEmbData.oned_embedding_df[prop][index2] for prop in properties}
         item2_dict = dict(value=[thisVizEmbData.oned_embedding_df[prop][index2] for prop in properties], stage=properties)
-        # item2_dict["stage"] = properties
-        # item2_dict["title"] = item2
 
         df1 = pd.DataFrame(item1_dict)
         df1['title'] = item1
-        # df_mtl['office'] = 'Montreal'
         df2 = pd.DataFrame(item2_dict)
         df2['title'] = item2
-        # df_toronto['office'] = 'Toronto'
         df = pd.concat([df1, df2], axis=0)
-        # print(df)
         fig = px.funnel(df, x='value', y='stage', color='title')
         st.write(fig)

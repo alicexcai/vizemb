@@ -3,11 +3,14 @@ import pandas as pd
 import numpy as np
 from collections import defaultdict
 from .embed import ai_embed
-import ast
 from sklearn.manifold import TSNE
 
 import warnings
 warnings.filterwarnings('ignore')
+
+class Params:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
 
 class EmbeddingDf:
     def __init__(self):
@@ -107,20 +110,10 @@ class VizEmbData:
         self.colvalue_df[property_filter] = self.df.filter(regex=property_filter)
 
     def filter_df(self, property_filter):
-        # filter df by property filter
-        # if property_filter["type"] == "quant":
-        #     self.filtered_df[property_filter["property"]] = self.df[self.df[property_filter["property"]] == property_filter["value"]]
-        
-        # if property_filter["type"] == "cat":
-        #     self.filtered_df[property_filter["property"]] = self.df[self.df[property_filter["property"]].isin(property_filter["value"])]
         self.filtered_df = self.df.copy()
         for prop, values in property_filter.items():
-            # self.filtered_df = self.filtered_df.query(f'any(value in {prop} for value in {values})')
             self.filtered_df = self.filtered_df[self.filtered_df[prop].str.contains("|".join(values), na=False, regex=True)]
-            print(len(self.filtered_df))
-            # self.filtered_df = self.filtered_df[any(value in self.filtered_df[prop] for value in values) == True]
         return self.filtered_df
-        # self.filter_df[property_filter] = self.df[property_filter["property"] == property_filter["value"]]
 
     def search_df(self, search_params):
         # search df by search params
@@ -147,11 +140,7 @@ class VizEmbData:
         self.sem_embedding_df["sem_embedding"] = self.sem_embedding_df["sem_embedding"].astype("object")
         for index in range(len(self.sem_embedding_df)):
             for prop in list(self.properties["sem"].keys()) + list(self.properties["cat"].keys()):
-                # if index == 435:
-                #     self.sem_embedding_df.at[index, prop] = np.repeat(0.5, 512)
                 if str(self.sem_embedding_df.iloc[index][prop]) == "nan":
-                    # print("nan replaced")
-                    # print("INDEX REPLACED:", index)
                     self.sem_embedding_df.at[index, prop] = np.repeat(0.5, 512)
                 else:
                     self.sem_embedding_df.at[index, prop] = ai_embed([str(self.sem_embedding_df.iloc[index][prop])])
@@ -169,16 +158,11 @@ class VizEmbData:
 
             for prop in self.properties["quant"]:
                 self.default_embedding_df.highdim.at[index, prop] = self.quant_embedding_df.iloc[index][prop]
-                # print("DEBUG", len(self.default_embedding_df.highdim.at[index, prop]))
             for prop in list(self.properties["sem"].keys()) + list(self.properties["cat"].keys()):
                 try:
                     self.default_embedding_df.highdim.at[index, prop] = self.sem_embedding_df.iloc[index][prop][0].numpy()
-                    # print("DEBUG, try: ")
                 except:
                     self.default_embedding_df.highdim.at[index, prop] = self.sem_embedding_df.iloc[index][prop]
-                #     print("DEBUG, except: ")
-                # print("DEBUG: ", type(self.default_embedding_df.highdim.at[index, prop]), len(self.default_embedding_df.highdim.at[index, prop]))
-
             self.default_embedding_df.highdim.at[index, "[gen] composite_embedding"] = self.default_embedding_df.highdim.filter(regex="quant|sem|cat").iloc[index, :].to_numpy()
         # print("FINAL default_embedding_df.highdim: ", self.default_embedding_df.highdim)
         # self.default_embedding_df.highdim.to_pickle("default_embedding_df_highdim.pkl")
@@ -203,15 +187,12 @@ class VizEmbData:
             embedding_obj.expanded = self.default_embedding_df.highdim.copy()
             target_length = self.sem_embedding_length
             for quant_prop in list(self.properties["quant"].keys()):
-                # print("QUANT PROP: ", quant_prop)
-                # print("WEIGHTS: ", weights[quant_prop])
                 for index in range(len(embedding_obj.expanded)):
                     embedding_obj.expanded[quant_prop] = embedding_obj.expanded[quant_prop].astype("object")
                     quantprop_value = float(embedding_obj.expanded.iloc[index][quant_prop])
                     expanded_embedding = np.repeat(quantprop_value if quantprop_value >= 0 else 0.5, target_length*weights[quant_prop])
                     embedding_obj.expanded.at[index, quant_prop] = expanded_embedding
             for text_prop in list(self.properties["sem"].keys()) + list(self.properties["cat"].keys()):
-                # print("TEXT PROP: ", text_prop)
                 for index in range(len(embedding_obj.expanded)):
                     embedding_obj.expanded[quant_prop] = embedding_obj.expanded[text_prop].astype("object")
                     textprop_value = embedding_obj.expanded.iloc[index][text_prop]
@@ -220,7 +201,6 @@ class VizEmbData:
         
             for index in range(len(embedding_obj.expanded)):
                 embedding_obj.expanded.at[index, "[gen] expanded_composite_embedding"] = embedding_obj.expanded.filter(regex="quant|sem|cat").iloc[index, :].to_numpy()
-                # print("IND: ", index, "DEBUG: ", embedding_obj.expanded.at[index, "[gen] expanded_composite_embedding"].shape)
 
     def reduce2twod_embedding_df(self, embedding_obj, weights = "default"):
         if type(embedding_obj) != EmbeddingDf:
@@ -242,10 +222,6 @@ class VizEmbData:
                 if full_embedding.shape == last_shape:
                     full_embeddings.append(full_embedding)
                     last_shape = full_embedding.shape
-                # print("DEBUG: ", full_embedding.shape)
-            # print("DEBUG: ", full_embeddings)
-            # print("DEBUG: ", full_embeddings[0].shape, full_embeddings[434].shape, full_embeddings[435].shape)
-            # full_embeddings = full_embeddings[:-1]
             reduced_embeddings = TSNE(n_components=2, learning_rate='auto', init='random').fit_transform(np.vstack(full_embeddings))
             for index in range(len(embedding_obj.twod)):
                 try:
@@ -256,37 +232,11 @@ class VizEmbData:
                     embedding_obj.twod.drop(index, inplace=True)
 
     def reduce2oned_embedding_df(self):
-        # self.expand_embedding(self.default_embedding_df, weights = "default")
         self.oned_embedding_df = self.default_embedding_df.highdim.copy()
         for prop in list(self.properties["sem"].keys()) + list(self.properties["cat"].keys()):
             full_embeddings = self.oned_embedding_df[prop].to_numpy()
             reduced_embeddings = TSNE(n_components=1, learning_rate='auto', init='random').fit_transform(np.vstack(full_embeddings))
             for index in range(len(self.oned_embedding_df)):
                 self.oned_embedding_df.at[index, prop] = reduced_embeddings[index][0]
-        # for prop in list(self.properties["quant"].keys()):
-        #     for index in range(len(self.oned_embedding_df)):
-        #         self.oned_embedding_df.at[index, prop] = reduced_embeddings[index]
-
-        # self.oned_embedding_df["[gen] 1d embedding"] = None
-        # self.oned_embedding_df["[gen] 1d embedding"] = self.oned_embedding_df["[gen] 1d embedding"].astype("object")
-        # full_embeddings = []
-        # for index in range(len(self.oned_embedding_df)):
-        #     full_embedding_list = self.default_embedding_df.expanded.iloc[index]["[gen] expanded_composite_embedding"]
-        #     full_embedding = np.concatenate(full_embedding_list).ravel().reshape(-1).flatten()
-        #     if index == 0: last_shape = full_embedding.shape
-        #     if full_embedding.shape == last_shape:
-        #         full_embeddings.append(full_embedding)
-        #         last_shape = full_embedding.shape
-        #     # print("DEBUG: ", full_embedding.shape)
-        # # print("DEBUG: ", full_embeddings)
-        # # print("DEBUG: ", full_embeddings[0].shape, full_embeddings[434].shape, full_embeddings[435].shape)
-        # # full_embeddings = full_embeddings[:-1]
-        # reduced_embeddings = TSNE(n_components=1, learning_rate='auto', init='random').fit_transform(np.vstack(full_embeddings))
-        # for index in range(len(self.oned_embedding_df)):
-        #     try:
-        #         self.oned_embedding_df.at[index, "[gen] 1d embedding"] = reduced_embeddings[index]
-        #     except:
-        #         self.oned_embedding_df.drop(index, inplace=True)
-        # print(self.oned_embedding_df)
 
 thisVizEmbData = VizEmbData()
