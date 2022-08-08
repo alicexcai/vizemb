@@ -2,18 +2,22 @@
 import pandas as pd
 import numpy as np
 from collections import defaultdict
-from .functions import ai_embed
-import ast
+from .embed import ai_embed
 from sklearn.manifold import TSNE
 
 import warnings
 warnings.filterwarnings('ignore')
 
+class Params:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
 class EmbeddingDf:
     def __init__(self):
         self.highdim = None
         self.expanded = None
-        self.reduced = None
+        self.unraveled = None
+        # self.reduced = None
         self.twod = None
 
     
@@ -23,8 +27,10 @@ class VizEmbData:
         self.project_name = ""
         self.db_file = None
         self.db_filename = None
+        self.unprocessed_df = None
         self.df = None
-        self.filtered_df = defaultdict()
+        self.colvalue_df = defaultdict()
+        self.filtered_df = None
         self.info_df = None
         self.quant_df = None
         self.sem_df = None
@@ -39,11 +45,10 @@ class VizEmbData:
         self.sem_embedding_length = None
         self.quant_embedding_df = None
         self.sem_embedding_df = None
-        # self.default_embedding_df = None
-        # self.specified_embedding_df = None
-        # self.reduced_embedding_df = None
         self.default_embedding_df = EmbeddingDf()
         self.specified_embedding_df = EmbeddingDf()
+
+        self.oned_embedding_df = None
 
     def __repr__(self):
         return f"{self.name} ({self.file_path})"
@@ -57,9 +62,17 @@ class VizEmbData:
 
     def load_df(self):
         try:
-            self.df = pd.read_csv(self.db_file, encoding = "ISO-8859-1") # threw error with utf-8
+            self.unprocessed_df = pd.read_csv(self.db_file, encoding = "ISO-8859-1") # threw error with utf-8
         except:
             raise Exception(f"Could not load data from {self.db_file}")
+    
+    def process_df(self, column_dict):
+        self.df = self.unprocessed_df.copy()
+        self.df = self.df.filter(regex="|".join(list(column_dict.keys())))
+        column_rename_dict = {col: "[" + column_dict[col] +  "] " + col for col in list(column_dict.keys())}
+        # print("DEBUG: ", column_rename_dict)
+        self.df = self.df.rename(columns=column_rename_dict)
+        print("DEBUG: ", self.df)
 
     def split_df(self):
         # split semantic, categorical, and quantitative
@@ -88,6 +101,7 @@ class VizEmbData:
             concat_cat_values = ','.join(self.cat_df[cat_name].astype(str))
             all_cat_values = [x.strip() for x in concat_cat_values.split(',')]
             self.cat_values[cat_name] = list(set(all_cat_values))
+            self.properties["cat"][cat_name] = self.cat_values[cat_name]
             # creates a column for each category value
             for cat_value in self.cat_values[cat_name]:
                 for index in range(len(counted_df)):
@@ -95,18 +109,35 @@ class VizEmbData:
                     counted_df.at[index, "[catval] " + cat_value] = 1 if cat_value in self.cat_df.at[index, cat_name] else 0
             # add category count dfs to dictionary, keyed by category name
             self.parsed_cat_dfs[cat_name] = counted_df
-        # print("parsed_cat_dfs: ", self.parsed_cat_dfs)
+
+    def calculate_quantd_counts(self, quantd):
+        # calculate quantitative counts by property filter
+        return self.quant_df[quantd].value_counts()
+        
     
     def calculate_cat_counts(self):
         # calculate categorical counts by property filter
+        # print("DEBUG: ", self.cat_values)
         for cat in self.properties["cat"]:
+            self.cat_counts[cat] = defaultdict()
             for cat_value in self.cat_values[cat]:
-                # self.cat_counts[cat].append(self.df[self.df[cat] == cat_value].shape[0])
-                self.cat_counts[cat][cat_value] = self.cat_df[cat][cat_value == 1].shape[0]
+                # print("DEBUG: cat_value:", cat_value)
+                # print("DEBUG: cat:", cat)
+                # # print("DEBUG: self.cat_df[cat]:", self.cat_df[cat])
+                print("DEBUG: ", self.parsed_cat_dfs[cat]["[catval] " + cat_value])
+                self.cat_counts[cat][cat_value] = self.parsed_cat_dfs[cat][self.parsed_cat_dfs[cat]["[catval] " + cat_value] == 1].shape[0]
     
-    def filter_df(self, property_filter):
+    def get_colvalues(self, property_filter):
         # filter df by property filter
-        self.filtered_df[property_filter] = self.df.filter(regex=property_filter)
+        self.colvalue_df[property_filter] = self.df.filter(regex=property_filter)
+
+    def filter_df(self, property_filter):
+        self.filtered_df = self.df.copy()
+        print("filtering df by", property_filter)
+        for prop, values in property_filter.items():
+
+            self.filtered_df = self.filtered_df[self.filtered_df[prop].str.contains("|".join(values), na=False, regex=True)]
+        return self.filtered_df
 
     def search_df(self, search_params):
         # search df by search params
@@ -124,8 +155,6 @@ class VizEmbData:
         self.quant_embedding_df["quant_embedding"] = self.quant_embedding_df["quant_embedding"].astype("object")
         for index in range(len(self.quant_embedding_df)):
             self.quant_embedding_df.at[index, "quant_embedding"] = self.quant_embedding_df.filter(regex="quant").iloc[index, :].to_numpy()
-        # print("quant_embedding_df: ", self.quant_embedding_df)
-        
 
     def calculate_sem_embedding(self):
         # calculate semantic embedding and output embedding df
@@ -135,12 +164,14 @@ class VizEmbData:
         self.sem_embedding_df["sem_embedding"] = self.sem_embedding_df["sem_embedding"].astype("object")
         for index in range(len(self.sem_embedding_df)):
             for prop in list(self.properties["sem"].keys()) + list(self.properties["cat"].keys()):
-                self.sem_embedding_df.at[index, prop] = ai_embed([str(self.sem_embedding_df.iloc[index][prop])])
+                if str(self.sem_embedding_df.iloc[index][prop]) == "nan":
+                    self.sem_embedding_df.at[index, prop] = np.repeat(0.5, 512)
+                else:
+                    self.sem_embedding_df.at[index, prop] = ai_embed([str(self.sem_embedding_df.iloc[index][prop])])
                 if self.sem_embedding_length == None:
                     self.sem_embedding_length = self.sem_embedding_df.at[index, prop][0].shape[0]
             # concatenate the float values in each column into a single array
             self.sem_embedding_df.at[index, "sem_embedding"] = self.sem_embedding_df.filter(regex="sem|cat").iloc[index, :].to_numpy()
-        # print("sem_embedding_df: ", self.sem_embedding_df)
 
     def compose_default_embedding(self):
         # calculate composite embedding by combining quantitative and semantic embeddings
@@ -148,79 +179,59 @@ class VizEmbData:
         self.calculate_sem_embedding()
         self.default_embedding_df.highdim = self.df.copy()
         for index in range(len(self.df)):
-            # print("quant_embedding", type(self.quant_embedding_df.iloc[index]["quant_embedding"]))
-            # print(self.quant_embedding_df.iloc[index]["quant_embedding"])
-            # print("sem_embedding", type(self.sem_embedding_df.iloc[index]["sem_embedding"]))
-            # print(self.sem_embedding_df.iloc[index]["sem_embedding"][0].numpy()[0])
-            # print(type(self.sem_embedding_df.iloc[index]["sem_embedding"][0].numpy()[0]))
-            # print("DEBUG: ", [embedding for embedding in self.sem_embedding_df.iloc[index]["sem_embedding"][0].numpy()[0]])
+
             for prop in self.properties["quant"]:
                 self.default_embedding_df.highdim.at[index, prop] = self.quant_embedding_df.iloc[index][prop]
             for prop in list(self.properties["sem"].keys()) + list(self.properties["cat"].keys()):
-                # print("DEBUG: ", self.sem_embedding_df.iloc[index][prop][0].numpy())
-                self.default_embedding_df.highdim.at[index, prop] = self.sem_embedding_df.iloc[index][prop][0].numpy()
-
-            # for prop in list(self.properties["quant"].keys()) + list(self.properties["sem"].keys()) + list(self.properties["cat"].keys()):
-            self.default_embedding_df.highdim.at[index, "[gen] composite_embedding"] = self.default_embedding_df.highdim.filter(regex="sem|cat").iloc[index, :].to_numpy()
-            # self.default_embedding_df.highdim.at[index, "[gen] composite_embedding"] = self.default_embedding_df.highdim.filter(regex="quant|sem|cat").iloc[index, :].to_numpy()
-
-            # self.default_embedding_df["composite_embedding"].append([embedding.numpy()[0] for embedding in self.sem_embedding_df.iloc[index]["sem_embedding"]])
-            # self.default_embedding_df = np.concatenate([self.quant_embedding_df.iloc[index]["quant_embedding"], self.sem_embedding_df.iloc[index]["sem_embedding"][0].numpy()[0]])
+                try:
+                    self.default_embedding_df.highdim.at[index, prop] = self.sem_embedding_df.iloc[index][prop][0].numpy()
+                except:
+                    self.default_embedding_df.highdim.at[index, prop] = self.sem_embedding_df.iloc[index][prop]
+            self.default_embedding_df.highdim.at[index, "[gen] composite_embedding"] = self.default_embedding_df.highdim.filter(regex="quant|sem|cat").iloc[index, :].to_numpy()
         # print("FINAL default_embedding_df.highdim: ", self.default_embedding_df.highdim)
-        # save as csv
         # self.default_embedding_df.highdim.to_pickle("default_embedding_df_highdim.pkl")
 
     def compose_specified_embedding(self, weights):
         # calculate composite embedding by combining weighted quantitative and semantic embeddings
-        return self.specified_embedding_df
+        # self.compose_default_embedding()
+        # self.specified_embedding_df.highdim = self.default_embedding_df.highdim.copy()
 
-    def expand_embedding(self, embedding_obj):
+        # return self.specified_embedding_df.twod
+        pass
+
+    def expand_embedding(self, embedding_obj, weights):
+        if weights == "default":
+            weights = {prop : 1 for prop in list(self.properties["quant"].keys()) + list(self.properties["sem"].keys()) + list(self.properties["cat"].keys())}
+            # weights = 1/(len(list(self.properties["sem"].keys()) + list(self.properties["cat"].keys()) + list(self.properties["quant"].keys())))
+        print("WEIGHTS: ", weights)
         # pad embedding with constant values to make it consistent in length in all dimensions
         if type(embedding_obj) != EmbeddingDf:
             raise TypeError("embedding_obj must be of type EmbeddingDf")
         else:
             embedding_obj.expanded = self.default_embedding_df.highdim.copy()
             target_length = self.sem_embedding_length
-            # target_length = self.sem_embedding_df.iloc[0]["sem_embedding"][0].numpy()[0].shape[0]
-            print("TARGET LENGTH: ", target_length)
-            for quant_prop in self.properties["quant"]:
-                embedding_obj.expanded[quant_prop] = None
+            for quant_prop in list(self.properties["quant"].keys()):
                 for index in range(len(embedding_obj.expanded)):
                     embedding_obj.expanded[quant_prop] = embedding_obj.expanded[quant_prop].astype("object")
-                    print("quant_prop", quant_prop)
-                    expanded_embedding = np.repeat(embedding_obj.expanded.iloc[index][quant_prop] if embedding_obj.expanded.iloc[index][quant_prop] is not None else 0.5, target_length)
-                    print("EXPANDED EMBEDDING: ", expanded_embedding)
+                    quantprop_value = float(embedding_obj.expanded.iloc[index][quant_prop])
+                    expanded_embedding = np.repeat(quantprop_value if quantprop_value >= 0 else 0.5, target_length*weights[quant_prop])
                     embedding_obj.expanded.at[index, quant_prop] = expanded_embedding
-
+            for text_prop in list(self.properties["sem"].keys()) + list(self.properties["cat"].keys()):
+                for index in range(len(embedding_obj.expanded)):
+                    embedding_obj.expanded[quant_prop] = embedding_obj.expanded[text_prop].astype("object")
+                    textprop_value = embedding_obj.expanded.iloc[index][text_prop]
+                    expanded_embedding = np.repeat(textprop_value, weights[text_prop])
+                    embedding_obj.expanded.at[index, text_prop] = expanded_embedding
+        
             for index in range(len(embedding_obj.expanded)):
-                self.default_embedding_df.expanded.at[index, "[gen] expanded_composite_embedding"] = self.default_embedding_df.highdim.filter(regex="quant|sem|cat").iloc[index, :].to_numpy()
-            # print("EXPANDED EMBEDDING: ", embedding_obj.expanded)
-            # self.default_embedding_df.expanded.to_pickle("default_embedding_df_expanded.pkl")
+                embedding_obj.expanded.at[index, "[gen] expanded_composite_embedding"] = embedding_obj.expanded.filter(regex="quant|sem|cat").iloc[index, :].to_numpy()
 
-
-    # def reduce2twod_embedding_df(self, embedding_obj):
-    #     if type(embedding_obj) != EmbeddingDf:
-    #         raise TypeError("embedding_obj must be of type EmbeddingDf")
-    #     else:
-    #         self.expand_embedding(embedding_obj)
-    #         embedding_obj.twod = self.info_df.copy()
-    #         for index in range(len(embedding_obj.twod)):
-    #             full_embedding = embedding_obj.expanded.iloc[index]["[gen] expanded_composite_embedding"]
-    #             # print(type(ast.literal_eval(full_embedding)))
-    #             print("DEBUG FULL EMBEDDING: ", full_embedding)
-    #             print("DEBUG FULL EMBEDDING TYPE: ", type(full_embedding))
-    #             print("DEBUG FULL EMBEDDING SHAPE: ", full_embedding.shape)
-    #             reduced_embedding = TSNE(n_components=2, learning_rate='auto', init='random').fit_transform(full_embedding)
-    #             print("reduced_embedding: ", reduced_embedding)
-    #             embedding_obj.twod["[gen] 2d embedding"] = reduced_embedding
-    #         print("embedding_obj.twod: ", embedding_obj.twod)
-
-    def reduce2twod_embedding_df(self, embedding_obj):
+    def reduce2twod_embedding_df(self, embedding_obj, weights = "default"):
         if type(embedding_obj) != EmbeddingDf:
             raise TypeError("embedding_obj must be of type EmbeddingDf")
         else:
-            self.expand_embedding(embedding_obj)
-            embedding_obj.twod = self.info_df.copy()
+            self.expand_embedding(embedding_obj, weights = weights)
+            embedding_obj.twod = self.df.copy()
             embedding_obj.twod["[gen] 2d embedding"] = None
             embedding_obj.twod["[gen] 2d embedding"] = embedding_obj.twod["[gen] 2d embedding"].astype("object")
             embedding_obj.twod["[gen] 2d embedding x"] = None
@@ -230,23 +241,27 @@ class VizEmbData:
             full_embeddings = []
             for index in range(len(embedding_obj.twod)):
                 full_embedding_list = embedding_obj.expanded.iloc[index]["[gen] expanded_composite_embedding"]
-                for i in range(len(full_embedding_list)):
-                    print("DEBUG SHAPE: ", full_embedding_list[i].shape)
                 full_embedding = np.concatenate(full_embedding_list).ravel().reshape(-1).flatten()
-                full_embeddings.append(full_embedding)
-                # print(type(ast.literal_eval(full_embedding)))
-                print("DEBUG FULL EMBEDDING: ", full_embedding)
-                # print("DEBUG FULL EMBEDDING TYPE: ", type(full_embedding))
-                # for i in range(len(full_embedding)):
-                    # print("DEBUG FULL EMBEDDING SHAPE: ", full_embedding.shape)
-                # reduced_embedding = TSNE(n_components=2, learning_rate='auto', init='random').fit_transform(full_embedding)
+                if index == 0: last_shape = full_embedding.shape
+                if full_embedding.shape == last_shape:
+                    full_embeddings.append(full_embedding)
+                    last_shape = full_embedding.shape
+            embedding_obj.unraveled = np.array(full_embeddings)
             reduced_embeddings = TSNE(n_components=2, learning_rate='auto', init='random').fit_transform(np.vstack(full_embeddings))
             for index in range(len(embedding_obj.twod)):
-                print("DEBUG REDUCED EMBEDDING: ", reduced_embeddings[index])
-                embedding_obj.twod.at[index, "[gen] 2d embedding"] = reduced_embeddings[index]
-                embedding_obj.twod.at[index, "[gen] 2d embedding x"] = reduced_embeddings[index][0]
-                embedding_obj.twod.at[index, "[gen] 2d embedding y"] = reduced_embeddings[index][1]
-            print("embedding_obj.twod: ", embedding_obj.twod)
+                try:
+                    embedding_obj.twod.at[index, "[gen] 2d embedding"] = reduced_embeddings[index]
+                    embedding_obj.twod.at[index, "[gen] 2d embedding x"] = reduced_embeddings[index][0]
+                    embedding_obj.twod.at[index, "[gen] 2d embedding y"] = reduced_embeddings[index][1]
+                except:
+                    embedding_obj.twod.drop(index, inplace=True)
 
+    def reduce2oned_embedding_df(self):
+        self.oned_embedding_df = self.default_embedding_df.highdim.copy()
+        for prop in list(self.properties["sem"].keys()) + list(self.properties["cat"].keys()):
+            full_embeddings = self.oned_embedding_df[prop].to_numpy()
+            reduced_embeddings = TSNE(n_components=1, learning_rate='auto', init='random').fit_transform(np.vstack(full_embeddings))
+            for index in range(len(self.oned_embedding_df)):
+                self.oned_embedding_df.at[index, prop] = reduced_embeddings[index][0]
 
 thisVizEmbData = VizEmbData()

@@ -1,8 +1,5 @@
 import streamlit as st
 from modules.VizEmb import *
-import plotly.express as px
-import tensorflow as tf
-
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
@@ -18,10 +15,9 @@ if thisVizEmbData.df is None:
 else:
 
     # VISUALIZATioN PARAMETERS
-    
-    thisVizEmbData.filter_df("TITLE")
+
     thisVizEmbData.parse_cat_dfs()
-    visualization_items = st.multiselect("Select item names", thisVizEmbData.filtered_df["TITLE"])
+    visualization_items = st.multiselect("Select item names", thisVizEmbData.df["[title] TITLE"])
     max_word = st.slider("Max words", 5, 500, 100)
     max_font = st.slider("Max Font Size", 10, 100, 50)
     bg_color = st.selectbox("Background Color", ["white", "black"])
