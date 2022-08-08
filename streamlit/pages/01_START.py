@@ -47,6 +47,7 @@ if uploaded_file:
     st.markdown("""### Quantitative data""")
     st.write(thisVizEmbData.properties["quant"])
     st.write(thisVizEmbData.quant_df)
+
     st.markdown("""### Categorical data""")
     st.write(thisVizEmbData.properties["cat"])
     st.write(thisVizEmbData.cat_df)

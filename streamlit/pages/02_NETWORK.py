@@ -69,7 +69,7 @@ else:
         st.session_state.selected_embedding_df = False
 
     if st.button("Generate specified embeddings"):
-        embed.compose_specified_embedding(thisVizEmbData)
+        embed.compose_specified_embedding(thisVizEmbData, embedding_params)
         st.session_state.selected_embedding_df = thisVizEmbData.specified_embedding_df.twod
         st.session_state.generated = True
     else:

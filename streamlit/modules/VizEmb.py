@@ -99,12 +99,23 @@ class VizEmbData:
                     counted_df.at[index, "[catval] " + cat_value] = 1 if cat_value in self.cat_df.at[index, cat_name] else 0
             # add category count dfs to dictionary, keyed by category name
             self.parsed_cat_dfs[cat_name] = counted_df
+
+    def calculate_quantd_counts(self, quantd):
+        # calculate quantitative counts by property filter
+        return self.quant_df[quantd].value_counts()
+        
     
     def calculate_cat_counts(self):
         # calculate categorical counts by property filter
+        # print("DEBUG: ", self.cat_values)
         for cat in self.properties["cat"]:
+            self.cat_counts[cat] = defaultdict()
             for cat_value in self.cat_values[cat]:
-                self.cat_counts[cat][cat_value] = self.cat_df[cat][cat_value == 1].shape[0]
+                # print("DEBUG: cat_value:", cat_value)
+                # print("DEBUG: cat:", cat)
+                # # print("DEBUG: self.cat_df[cat]:", self.cat_df[cat])
+                print("DEBUG: ", self.parsed_cat_dfs[cat]["[catval] " + cat_value])
+                self.cat_counts[cat][cat_value] = self.parsed_cat_dfs[cat][self.parsed_cat_dfs[cat]["[catval] " + cat_value] == 1].shape[0]
     
     def get_colvalues(self, property_filter):
         # filter df by property filter
@@ -112,7 +123,9 @@ class VizEmbData:
 
     def filter_df(self, property_filter):
         self.filtered_df = self.df.copy()
+        print("filtering df by", property_filter)
         for prop, values in property_filter.items():
+
             self.filtered_df = self.filtered_df[self.filtered_df[prop].str.contains("|".join(values), na=False, regex=True)]
         return self.filtered_df
 
