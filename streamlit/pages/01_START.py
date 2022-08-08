@@ -1,5 +1,6 @@
 import streamlit as st
 from modules.VizEmb import *
+from modules import embed
 
 st.markdown("""
 ## GETTING STARTED
@@ -31,6 +32,18 @@ if uploaded_file:
     
     thisVizEmbData.get_properties()
     thisVizEmbData.split_df()
+
+    if st.button("Generate embeddings"):
+        embed.generate_default_embeddings(thisVizEmbData)
+
+    # if st.button("Generate embeddings"):
+    #     @st.cache
+    #     def generate_default_embeddings():
+    #         with st.spinner("Calculating embeddings..."):
+    #             thisVizEmbData.compose_default_embedding()
+    #             thisVizEmbData.reduce2oned_embedding_df()
+    #             st.success("Embeddings generated.")
+
     st.markdown("""### Quantitative data""")
     st.write(thisVizEmbData.properties["quant"])
     st.write(thisVizEmbData.quant_df)

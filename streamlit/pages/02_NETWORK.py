@@ -1,6 +1,7 @@
 import streamlit as st
 from modules.VizEmb import *
 import plotly.express as px
+from modules import embed
 
 from streamlit_plotly_events import plotly_events
 
@@ -36,37 +37,43 @@ else:
         embedding_params.hover_data = st.multiselect("Select data to display on hover", thisVizEmbData.df.columns.tolist())
 
 
-    @st.cache
-    def generate_default_embeddings():
-        with st.spinner("Calculating embeddings..."):
-            thisVizEmbData.compose_default_embedding()
-            thisVizEmbData.reduce2twod_embedding_df(thisVizEmbData.default_embedding_df, weights = "default")
-            st.success("Embeddings generated.")
+    # @st.cache
+    # def generate_default_embeddings():
+    #     with st.spinner("Calculating embeddings..."):
+    #         thisVizEmbData.compose_default_embedding()
+    #         thisVizEmbData.reduce2twod_embedding_df(thisVizEmbData.default_embedding_df, weights = "default")
+    #         st.success("Embeddings generated.")
 
-    # GENERATE EMBEDDINGS
-    @st.cache 
-    def compose_specified_embedding():
-        with st.spinner("Calculating specified embeddings..."):
-            thisVizEmbData.compose_default_embedding()
-            thisVizEmbData.specified_embedding_df.highdim = thisVizEmbData.default_embedding_df.highdim.copy()
-            thisVizEmbData.reduce2twod_embedding_df(thisVizEmbData.specified_embedding_df, embedding_params.property_weights)
-            st.success("Specified embeddings generated.")
+    # # GENERATE EMBEDDINGS
+    # @st.cache 
+    # def compose_specified_embedding():
+    #     with st.spinner("Calculating specified embeddings..."):
+    #         thisVizEmbData.compose_default_embedding()
+    #         thisVizEmbData.specified_embedding_df.highdim = thisVizEmbData.default_embedding_df.highdim.copy()
+    #         thisVizEmbData.reduce2twod_embedding_df(thisVizEmbData.specified_embedding_df, embedding_params.property_weights)
+    #         st.success("Specified embeddings generated.")
     
     # initialize session state for generated to false
-    if 'generated' not in st.session_state:
-        st.session_state.generated = False
+
+    # if 'generated' not in st.session_state:
+    #     st.session_state.generated = False
+    # if 'selected_embedding_df' not in st.session_state:
+    #     st.session_state.selected_embedding_df = False
+
+    # if st.button("Generate embeddings"):
+    #     embed.generate_default_embeddings()
+    #     st.session_state.selected_embedding_df = thisVizEmbData.default_embedding_df.twod
+    #     st.session_state.generated = True
+
     if 'selected_embedding_df' not in st.session_state:
         st.session_state.selected_embedding_df = False
 
-    if st.button("Generate embeddings"):
-        generate_default_embeddings()
-        st.session_state.selected_embedding_df = thisVizEmbData.default_embedding_df.twod
-        st.session_state.generated = True
     if st.button("Generate specified embeddings"):
-        compose_specified_embedding()
+        embed.compose_specified_embedding(thisVizEmbData)
         st.session_state.selected_embedding_df = thisVizEmbData.specified_embedding_df.twod
         st.session_state.generated = True
-
+    else:
+        st.session_state.selected_embedding_df = thisVizEmbData.default_embedding_df.twod
 
     if st.session_state.generated:
         embedding_fig = px.scatter(

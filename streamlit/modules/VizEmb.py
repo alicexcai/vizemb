@@ -16,6 +16,7 @@ class EmbeddingDf:
     def __init__(self):
         self.highdim = None
         self.expanded = None
+        self.unraveled = None
         # self.reduced = None
         self.twod = None
 
@@ -222,6 +223,7 @@ class VizEmbData:
                 if full_embedding.shape == last_shape:
                     full_embeddings.append(full_embedding)
                     last_shape = full_embedding.shape
+            embedding_obj.unraveled = np.array(full_embeddings)
             reduced_embeddings = TSNE(n_components=2, learning_rate='auto', init='random').fit_transform(np.vstack(full_embeddings))
             for index in range(len(embedding_obj.twod)):
                 try:
