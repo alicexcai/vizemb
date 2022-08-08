@@ -75,12 +75,12 @@ else:
         with col1.expander(f"{item1} data"):
             st.write(thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == item1])
             datadict1 = thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == item1].to_dict()
-            datadict1.pop("Unnamed: 0")
+            # datadict1.pop("Unnamed: 0")
             st.write({key: list(value.values())[0] for key, value in datadict1.items()})
         with col2.expander(f"{item2} data"):
             st.write(thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == item2])
             datadict2 = thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == item2].to_dict()
-            datadict2.pop("Unnamed: 0")
+            # datadict2.pop("Unnamed: 0")
             st.write({key: list(value.values())[0] for key, value in datadict2.items()})
             
         percentile_df1 = [calculate_percentile(thisVizEmbData.df[prop][index1], prop) for prop in quant_properties]

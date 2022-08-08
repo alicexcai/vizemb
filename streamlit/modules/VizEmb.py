@@ -27,6 +27,7 @@ class VizEmbData:
         self.project_name = ""
         self.db_file = None
         self.db_filename = None
+        self.unprocessed_df = None
         self.df = None
         self.colvalue_df = defaultdict()
         self.filtered_df = None
@@ -61,9 +62,17 @@ class VizEmbData:
 
     def load_df(self):
         try:
-            self.df = pd.read_csv(self.db_file, encoding = "ISO-8859-1") # threw error with utf-8
+            self.unprocessed_df = pd.read_csv(self.db_file, encoding = "ISO-8859-1") # threw error with utf-8
         except:
             raise Exception(f"Could not load data from {self.db_file}")
+    
+    def process_df(self, column_dict):
+        self.df = self.unprocessed_df.copy()
+        self.df = self.df.filter(regex="|".join(list(column_dict.keys())))
+        column_rename_dict = {col: "[" + column_dict[col] +  "] " + col for col in list(column_dict.keys())}
+        # print("DEBUG: ", column_rename_dict)
+        self.df = self.df.rename(columns=column_rename_dict)
+        print("DEBUG: ", self.df)
 
     def split_df(self):
         # split semantic, categorical, and quantitative
@@ -92,6 +101,7 @@ class VizEmbData:
             concat_cat_values = ','.join(self.cat_df[cat_name].astype(str))
             all_cat_values = [x.strip() for x in concat_cat_values.split(',')]
             self.cat_values[cat_name] = list(set(all_cat_values))
+            self.properties["cat"][cat_name] = self.cat_values[cat_name]
             # creates a column for each category value
             for cat_value in self.cat_values[cat_name]:
                 for index in range(len(counted_df)):
