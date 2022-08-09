@@ -32,8 +32,15 @@ else:
         embedding_params.marker_size = st.slider("Marker Size", 1, 50, 5)
         embedding_params.hover_data = st.multiselect("Select data to display on hover", thisVizEmbData.df.columns.tolist())
 
-    if 'selected_embedding_df' not in st.session_state:
+    if 'selected_embedding_df' not in st.session_state or st.session_state.selected_embedding_df is None:
         st.session_state.selected_embedding_df = False
+        st.session_state.generated = False
+
+    # if 'generated' not in st.session_state:
+    #     st.session_state.generated = False
+
+    if st.session_state.generated == False:
+        embed.generate_default_embeddings(thisVizEmbData)
 
     # generate embeddings
 
@@ -46,7 +53,9 @@ else:
 
     # display embeddings
 
-    if st.session_state.generated:
+    if st.session_state.generated == True:
+        with st.expander("View embedding values"):
+            st.write(st.session_state.selected_embedding_df[["[title] TITLE", "[gen] 2d embedding x", "[gen] 2d embedding y"]])
         embedding_fig = px.scatter(
         st.session_state.selected_embedding_df,
         x="[gen] 2d embedding x",
@@ -64,3 +73,4 @@ else:
                 selected_itemdata_dict = {col: selected_itemdata[col].values[0] for col in selected_itemdata.columns}
                 st.write(selected_itemdata)
                 st.write(selected_itemdata_dict)
+                st.image(thisVizEmbData.df.filter(regex="img").iloc[selected_index].values[0])

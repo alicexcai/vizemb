@@ -51,10 +51,14 @@ else:
             st.write(thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == item1])
             datadict1 = thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == item1].to_dict()
             st.write({key: list(value.values())[0] for key, value in datadict1.items()})
+            img1path = thisVizEmbData.df.filter(regex="img").iloc[index1].values[0]
+            st.image(img1path)
         with col2.expander(f"{item2} data"):
             st.write(thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == item2])
             datadict2 = thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == item2].to_dict()
             st.write({key: list(value.values())[0] for key, value in datadict2.items()})
+            img2path = thisVizEmbData.df.filter(regex="img").iloc[index1].values[0]
+            st.image(img2path)
             
         percentile_df1 = [calculate_percentile(thisVizEmbData.df[prop][index1], prop) for prop in quant_properties]
         percentile_df2 = [calculate_percentile(thisVizEmbData.df[prop][index2], prop) for prop in quant_properties]
@@ -76,7 +80,6 @@ else:
 
     generate_comparison(item1, item2)
 
-
     # find nearest neighbors
 
     def find_similar_items(item1, num_similar_items):
@@ -97,7 +100,12 @@ else:
     num_similar_items = st.slider("Number of similar items", 1, 10, 1)
 
     with st.expander("Item data"):
+        index = item_dict[selected_item]
         st.write(thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == selected_item])
+        datadict = thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == selected_item].to_dict()
+        st.write({key: list(value.values())[0] for key, value in datadict.items()})
+        imgpath = thisVizEmbData.df.filter(regex="img").iloc[index].values[0]
+        st.image(imgpath)
 
     if st.button("Find similar items"):
         results = find_similar_items(selected_item, num_similar_items+1)

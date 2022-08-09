@@ -82,8 +82,10 @@ class VizEmbData:
     
     def get_properties(self):
         # get list of properties from df
+        # print("DEBUGDEBUG: ", self.df.columns)
         self.properties["quant"] = {prop : None for prop in self.df.filter(regex='quant').columns.tolist()}
         for quantprop in self.properties["quant"]:
+            # print("DEBUGDEBUG: ", quantprop)
             self.properties["quant"][quantprop] = {"min": self.df.filter(regex=quantprop.replace("[quant]", ""))[quantprop].min(), "max": self.df.filter(regex=quantprop.replace("[quant]", ""))[quantprop].max(), "avg": self.df.filter(regex=quantprop.replace("[quant]", ""))[quantprop].mean()}
 
         self.properties["sem"] = {prop : None for prop in self.df.filter(regex='sem').columns.tolist()}

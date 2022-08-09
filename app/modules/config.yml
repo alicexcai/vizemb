@@ -1,0 +1,140 @@
+# DATABASE STRUCTURE
+
+columnOrder: [
+    "[title] TITLE",
+    "[date] DATE",
+    "[img] Cover Image",
+    "[sem] Description",
+    "[cat] Form-factor",
+    "[cat] Category of BCI",
+    "[cat] Type of Media",
+    "[sem] Keywords",
+    "[quant] Date",
+    "[quant] Prediction",
+    "[quant] BCI forecast",
+    "[quant] Reality factor",
+    "[quant] Neurafictionality", 
+    "[quant] Neuroptimism",
+    "[quant] Utopianism",
+    "[quant] Invasiveness",
+    "[info] Author/Director",
+    "[info] Distributed by",
+    "[info] Production Company"
+]
+
+columnMap: {
+    "Title": "[title] TITLE",
+    # "Year": "[date] DATE",
+    "Description": "[sem] Description",
+    "Form-factor": "[cat] Form-factor",
+    "Category of BCI": "[cat] Category of BCI",
+    "Type of Media (tentative)": "[cat] Type of Media",
+    "Keywords": "[sem] Keywords",
+    "Year": "[quant] Date",
+    "prediction": "[quant] Prediction",
+    "BCI forecast": "[quant] BCI forecast",
+    "reality factor": "[quant] Reality factor",
+    "neurafictionality": "[quant] Neurafictionality", 
+    "neuroptimism": "[quant] Neuroptimism",
+    "Utopia/Dystopia - tech-wise": "[quant] Utopianism",
+    "Level of invasiveness": "[quant] Invasiveness",
+    "Author/Directed by": "[info] Author/Director",
+    "Distributed by": "[info] Distributed by",
+    "Production Company": "[info] Production Company", 
+    "Cover": "[img] Cover Image"
+}
+
+discreteQuantProps: {
+    "[quant] Utopianism": {
+        "utopia, dystopia": 0.5,
+        "dystopia, utopia": 0.5,
+        "dystopia": 0.0,
+        "utopia": 1.0,
+    }, 
+    "[quant] Invasiveness": {
+        "Invasive, Non-invasive, non-contact": 0.33,
+        "Invasive, non-contact, Non-invasive": 0.33,
+        "non-contact, Invasive, Non-invasive": 0.33,
+        "Invasive, Non-invasive": 0.5,
+        "Non-invasive, Invasive": 0.5,
+        "Non-invasive, non-contact": 0.125,
+        "Invasive, non-contact": 0.375,
+        "non-contact": 0.0,
+        "Non-invasive": 0.25,
+        "Semi-invasive": 0.5,
+        "Invasive": 0.75,
+        "bio": 1.0,
+    }
+}
+
+# STATISTICS
+
+batchStats: [
+  "Average Values / Category",
+  "# of Items / Category"
+]
+
+presetCatCounts: ["[cat] Form-factor", "[cat] Category of BCI"]
+
+presetQuantdCounts: ["[quant] Invasiveness", "[quant] Utopianism"]
+
+presetCategories: {
+    "Communication": [
+        "Linking",
+        "Robot control",
+        "Telepathy",
+        "Reading thoughts"
+    ],
+    "Perception": [
+        "Control of the user",
+        "Emotions",
+        "Memory",
+        "Stimulation",
+        "Storage",
+        "Reality",
+        "Knowledge upload"
+    ],
+    "Consciousness": [
+        "Dreams",
+        "Transfer",
+        "Termination"
+    ],
+    "Surveillance": [
+        "Recording",
+        "Tracking",
+        "Advertisement",
+        "Cerebral defense"
+    ]
+}
+
+keywordMap: {
+    "Communication": "communication",
+    "Linking": "linking",
+    "Robot control": "robot",
+    "Telepathy": "telepathy",
+    "Reading thoughts": "reading",
+    "Perception": "perception",
+    "Control of the user": "user",
+    "Emotions": "emotions",
+    "Memory": "memory",
+    "Stimulation": "stimulation",
+    "Storage": "storage",
+    "Reality": "reality",
+    "Knowledge upload": "knowledge",
+    "Consciousness": "consciousness",
+    "Dreams": "dreams",
+    "Transfer": "transfer",
+    "Termination": "termination",
+    "Surveillance": "surveillance",
+    "Recording": "recording",
+    "Tracking": "tracking",
+    "Advertisement": "advertisement",
+    "Cerebral defense": "cerebral"
+}
+
+presetQuantProps: [
+    "[quant] Reality factor",
+    "[quant] Neurafictionality",
+    "[quant] Neuroptimism",
+    "[quant] BCI forecast"
+]
