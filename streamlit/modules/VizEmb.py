@@ -94,7 +94,6 @@ class VizEmbData:
         # replace nans with strings
         self.cat_df = self.cat_df.replace(np.nan,"None",regex=True)
         for cat_name in self.properties["cat"]:
-            # print("cat_name:", cat_name)
             counted_df = self.df.filter(regex='id|title|date')
             # find unique category values
             concat_cat_values = ','.join(self.cat_df[cat_name].astype(str))
@@ -127,7 +126,6 @@ class VizEmbData:
 
     def filter_df(self, property_filter):
         self.filtered_df = self.df.copy()
-        print("filtering df by", property_filter)
         for prop, values in property_filter.items():
             self.filtered_df = self.filtered_df[self.filtered_df[prop].str.contains("|".join(values), na=False, regex=True)]
         return self.filtered_df

@@ -86,7 +86,6 @@ else:
         knn.fit(embeddings)
         index = item_dict[item1]
         similar_items = knn.kneighbors([embeddings[index]], return_distance=False)
-        # print(type(similar_items))
         return similar_items.tolist()[0]
 
     st.markdown("""
