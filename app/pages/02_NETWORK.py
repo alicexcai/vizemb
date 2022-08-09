@@ -36,16 +36,13 @@ else:
         st.session_state.selected_embedding_df = False
         st.session_state.generated = False
 
-    # if 'generated' not in st.session_state:
-    #     st.session_state.generated = False
-
     if st.session_state.generated == False:
         embed.generate_default_embeddings(thisVizEmbData)
 
     # generate embeddings
 
     if st.button("Generate specified embeddings"):
-        embed.compose_specified_embedding(thisVizEmbData, embedding_params)
+        embed.generate_specified_embedding(thisVizEmbData, embedding_params)
         st.session_state.selected_embedding_df = thisVizEmbData.specified_embedding_df.twod
         st.session_state.generated = True
     else:

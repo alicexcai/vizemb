@@ -26,7 +26,7 @@ def ai_embed(text):
 
 @st.cache
 def generate_default_embeddings(thisVizEmbData):
-    thisVizEmbData.compose_default_embedding()
+    thisVizEmbData.generate_default_embedding()
     thisVizEmbData.reduce2twod_embedding_df(thisVizEmbData.default_embedding_df, weights = "default")
     thisVizEmbData.reduce2oned_embedding_df()
     st.session_state.generated = True
@@ -34,8 +34,8 @@ def generate_default_embeddings(thisVizEmbData):
 # generate specific embeddings
 
 @st.cache 
-def compose_specified_embedding(thisVizEmbData, embedding_params):
-    thisVizEmbData.compose_default_embedding()
+def generate_specified_embedding(thisVizEmbData, embedding_params):
+    thisVizEmbData.generate_default_embedding()
     thisVizEmbData.specified_embedding_df.highdim = thisVizEmbData.default_embedding_df.highdim.copy()
     thisVizEmbData.reduce2twod_embedding_df(thisVizEmbData.specified_embedding_df, embedding_params.property_weights)
     st.session_state.generated = True

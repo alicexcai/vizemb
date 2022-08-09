@@ -13,39 +13,22 @@ def neurafuture_preprocessing(df):
 
     processed_df = df.copy()
     processed_df.columns = processed_df.columns.str.replace(r'(^.*Title.*$)', "[title] TITLE")
-    # st.write(processed_df.columns)
-    # processed_df = processed_df.replace("<NA>", np.nan, inplace=True, regex=True)
     processed_df.rename(columns=configData["columnMap"], inplace=True)
     processed_df = processed_df.filter(items=list(configData["columnMap"].values()))
     processed_df["[date] DATE"] = processed_df["[quant] Date"]
-    # replace keywords with corresponding flotts from dictionary
     processed_df = processed_df.replace(np.nan, "None")
-    
-    # loop through image column and split string
+
     for i in range(len(processed_df["[img] Cover Image"])):
         if processed_df["[img] Cover Image"][i] != "None":
             processed_df.at[i, "[img] Cover Image"] = "imgs/" + processed_df.iloc[i]["[img] Cover Image"].split("/")[-1]
 
     for quant_prop in processed_df.filter(regex="quant|date").columns:
-        # st.write("processing quant prop:", quant_prop)
         processed_df.replace({quant_prop: {"None": 0.5}}, inplace=True)
+    
     for quantd_prop in configData["discreteQuantProps"]:
-
-        # astype(float)
-        # processed_df[quantd_prop] = processed_df[quantd_prop].replace(np.nan,0.5,regex=True)
-        # st.write(processed_df[quantd_prop])
-        # st.write(processed_df)
-        # st.write(quantd_prop)
-        # st.write(processed_df.iloc[2]["[cat] Form-factor"])
-        # st.write(type(processed_df.iloc[2]["[cat] Form-factor"]))
-        # processed_df[quantd_prop] = processed_df[quantd_prop].astype(str)
-        # processed_df1 = processed_df.replace(np.nan, "None")
-        # st.write(processed_df)
         processed_df = processed_df.replace({quantd_prop: configData["discreteQuantProps"][quantd_prop]})
         processed_df[quantd_prop] = processed_df[quantd_prop].astype(float)
-        # processed_df[quantd_prop] = processed_df[quantd_prop].astype(float)
-        
-    # st.write(processed_df)
+    
     processed_df = processed_df[configData["columnOrder"]]
     return processed_df
     

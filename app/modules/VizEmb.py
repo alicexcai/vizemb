@@ -82,10 +82,8 @@ class VizEmbData:
     
     def get_properties(self):
         # get list of properties from df
-        # print("DEBUGDEBUG: ", self.df.columns)
         self.properties["quant"] = {prop : None for prop in self.df.filter(regex='quant').columns.tolist()}
         for quantprop in self.properties["quant"]:
-            # print("DEBUGDEBUG: ", quantprop)
             self.properties["quant"][quantprop] = {"min": self.df.filter(regex=quantprop.replace("[quant]", ""))[quantprop].min(), "max": self.df.filter(regex=quantprop.replace("[quant]", ""))[quantprop].max(), "avg": self.df.filter(regex=quantprop.replace("[quant]", ""))[quantprop].mean()}
 
         self.properties["sem"] = {prop : None for prop in self.df.filter(regex='sem').columns.tolist()}
@@ -165,7 +163,7 @@ class VizEmbData:
             # concatenate the float values in each column into a single array
             self.sem_embedding_df.at[index, "sem_embedding"] = self.sem_embedding_df.filter(regex="sem|cat").iloc[index, :].to_numpy()
 
-    def compose_default_embedding(self):
+    def generate_default_embedding(self):
         # calculate composite embedding by combining quantitative and semantic embeddings
         self.calculate_quant_embedding()
         self.calculate_sem_embedding()

@@ -44,7 +44,7 @@ if uploaded_file:
     # show database details
 
     if thisVizEmbData.df is not None:
-        st.write("DEBUG")
+        
         thisVizEmbData.get_properties()
         thisVizEmbData.split_df()
         thisVizEmbData.parse_cat_dfs()
