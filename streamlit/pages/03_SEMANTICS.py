@@ -3,8 +3,6 @@ from modules.VizEmb import *
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
-### PAGE SETUP ###
-
 st.markdown("""
 # SEMANTICS
 *visualize the semantic properties of your data*
@@ -14,7 +12,7 @@ if thisVizEmbData.df is None:
     st.success("No data loaded. Please load your database in START.")
 else:
 
-    # VISUALIZATioN PARAMETERS
+    # visualization parameters
 
     thisVizEmbData.parse_cat_dfs()
     visualization_items = st.multiselect("Select item names", thisVizEmbData.df["[title] TITLE"])
@@ -28,6 +26,7 @@ else:
     else:
 
         # get descriptions
+
         items_df = thisVizEmbData.df.loc[thisVizEmbData.df["[title] TITLE"].isin(visualization_items)]
         items_descriptions = {title : description for title, description in zip(items_df["[title] TITLE"], items_df["[sem] Description"])}
         for title, description in items_descriptions.items():
@@ -35,7 +34,8 @@ else:
                 st.write(description)
         items_descriptions_concat = " ".join(items_descriptions.values())
 
-        # generate a word cloud image:
+        # generate a word cloud image
+        
         wordcloud = WordCloud(background_color=bg_color, colormap=color_map, max_words=max_word, max_font_size=max_font).generate(items_descriptions_concat)
         fig, ax = plt.subplots()
         plt.axis("off")

@@ -1,4 +1,3 @@
-from asyncio import selector_events
 import streamlit as st
 from modules.VizEmb import *
 
@@ -6,7 +5,6 @@ st.markdown("""
 # STATISTICS
 *perform statistical analyses on your data*
 """)
-
 
 if thisVizEmbData.df is None:
     st.success("No data loaded. Please load your database in START.")

@@ -14,6 +14,8 @@ else:
         st.write(thisVizEmbData.df)
     parameter_list = thisVizEmbData.df.columns.tolist()
 
+    # graph parameters
+
     graph_type = st.selectbox("Select graph type", [
         "Quantitative Data / Time",
         "Quantitative Data / Category",
@@ -28,8 +30,6 @@ else:
         "Categorical Data / Category": {"x": "[cat]", "y": "[cat]"},
         "Free form": {"x": "", "y": ""}
         }
-
-    ### GENERIC GRAPH PARAMETERS ###
 
     with st.expander("Set graph parameters"):
         graph_title = st.text_input("Enter your graph title:", "Graph Title")
@@ -48,7 +48,6 @@ else:
                 'Moving Averages: Exponential',
                 'Moving Averages: Expanding'])
 
-    # Types of regressions: https://plotly.com/python/linear-fits/   
     regression_options = {
         'Ordinary Least Squares': ['ols', None], 
         'Locally Weighted Scatterplot Smoothing': ['lowess', dict(frac=0.1)], 
@@ -56,7 +55,11 @@ else:
         'Moving Averages: Exponential': ['ewm', dict(halflife=2)],
         'Moving Averages: Expanding': ['expanding', None],
         }
+    # ref: https://plotly.com/python/linear-fits/   
+    
     graph_fig = None
+
+    # generate graph
 
     if graph_type == "Quantitative Data / Time" or graph_type == "Quantitative Data / Category":
         graph_fig = px.scatter(
@@ -84,7 +87,8 @@ else:
                 )
                 st.success("Categorical statistics calculated.")
         
+    # display graph
 
-    # st.subheader(graph_title)
+    st.subheader(graph_title)
     if graph_fig:
         st.write(graph_fig)

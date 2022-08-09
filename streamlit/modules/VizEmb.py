@@ -1,16 +1,18 @@
-# from classes import Item, Database
 import pandas as pd
 import numpy as np
 from collections import defaultdict
 from .embed import ai_embed
 from sklearn.manifold import TSNE
-
 import warnings
 warnings.filterwarnings('ignore')
+
+# generic parameter class
 
 class Params:
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
+
+# embedding dataframe class
 
 class EmbeddingDf:
     def __init__(self):
@@ -20,7 +22,8 @@ class EmbeddingDf:
         # self.reduced = None
         self.twod = None
 
-    
+# main database class
+
 class VizEmbData:
     def __init__(self, **kwargs):
         # self.__dict__.update(kwargs) # only if necessary
@@ -37,7 +40,6 @@ class VizEmbData:
         self.cat_df = None
         self.properties = defaultdict() # { quant: {property: {min: , max: , avg: }}, sem: {}, cat: {} }
         
-        # move categorical data into properties nested dictionary
         self.cat_values = defaultdict() # {cat_name1 : [cat_value1, cat_value2, ...], cat_name2 ...}
         self.parsed_cat_dfs = defaultdict() # {cat_name1 : parsed_cat1_df, cat_name2 : parsed_cat2_df, ...}
         self.cat_counts = defaultdict() # {cat_name1 : {cat_value1: #, cat_value2: #, ...}, cat_name2 ...}
@@ -70,12 +72,9 @@ class VizEmbData:
         self.df = self.unprocessed_df.copy()
         self.df = self.df.filter(regex="|".join(list(column_dict.keys())))
         column_rename_dict = {col: "[" + column_dict[col] +  "] " + col for col in list(column_dict.keys())}
-        # print("DEBUG: ", column_rename_dict)
         self.df = self.df.rename(columns=column_rename_dict)
-        print("DEBUG: ", self.df)
 
     def split_df(self):
-        # split semantic, categorical, and quantitative
         self.info_df = self.df.filter(regex='id|title|date|info')
         self.quant_df = self.df.filter(regex='quant|id|title|date')
         self.sem_df = self.df.filter(regex='sem|id|title|date')
@@ -117,14 +116,9 @@ class VizEmbData:
     
     def calculate_cat_counts(self):
         # calculate categorical counts by property filter
-        # print("DEBUG: ", self.cat_values)
         for cat in self.properties["cat"]:
             self.cat_counts[cat] = defaultdict()
             for cat_value in self.cat_values[cat]:
-                # print("DEBUG: cat_value:", cat_value)
-                # print("DEBUG: cat:", cat)
-                # # print("DEBUG: self.cat_df[cat]:", self.cat_df[cat])
-                print("DEBUG: ", self.parsed_cat_dfs[cat]["[catval] " + cat_value])
                 self.cat_counts[cat][cat_value] = self.parsed_cat_dfs[cat][self.parsed_cat_dfs[cat]["[catval] " + cat_value] == 1].shape[0]
     
     def get_colvalues(self, property_filter):
@@ -135,7 +129,6 @@ class VizEmbData:
         self.filtered_df = self.df.copy()
         print("filtering df by", property_filter)
         for prop, values in property_filter.items():
-
             self.filtered_df = self.filtered_df[self.filtered_df[prop].str.contains("|".join(values), na=False, regex=True)]
         return self.filtered_df
 
@@ -188,22 +181,10 @@ class VizEmbData:
                 except:
                     self.default_embedding_df.highdim.at[index, prop] = self.sem_embedding_df.iloc[index][prop]
             self.default_embedding_df.highdim.at[index, "[gen] composite_embedding"] = self.default_embedding_df.highdim.filter(regex="quant|sem|cat").iloc[index, :].to_numpy()
-        # print("FINAL default_embedding_df.highdim: ", self.default_embedding_df.highdim)
-        # self.default_embedding_df.highdim.to_pickle("default_embedding_df_highdim.pkl")
-
-    def compose_specified_embedding(self, weights):
-        # calculate composite embedding by combining weighted quantitative and semantic embeddings
-        # self.compose_default_embedding()
-        # self.specified_embedding_df.highdim = self.default_embedding_df.highdim.copy()
-
-        # return self.specified_embedding_df.twod
-        pass
 
     def expand_embedding(self, embedding_obj, weights):
         if weights == "default":
             weights = {prop : 1 for prop in list(self.properties["quant"].keys()) + list(self.properties["sem"].keys()) + list(self.properties["cat"].keys())}
-            # weights = 1/(len(list(self.properties["sem"].keys()) + list(self.properties["cat"].keys()) + list(self.properties["quant"].keys())))
-        print("WEIGHTS: ", weights)
         # pad embedding with constant values to make it consistent in length in all dimensions
         if type(embedding_obj) != EmbeddingDf:
             raise TypeError("embedding_obj must be of type EmbeddingDf")
