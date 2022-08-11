@@ -30,7 +30,7 @@ else:
         items_df = thisVizEmbData.df.loc[thisVizEmbData.df["[title] TITLE"].isin(visualization_items)]
         items_descriptions = {title : description for title, description in zip(items_df["[title] TITLE"], items_df["[sem] Description"])}
         for title, description in items_descriptions.items():
-            with st.expander(title):
+            with st.expander(f"{title} description"):
                 st.write(description)
         items_descriptions_concat = " ".join(items_descriptions.values())
 
