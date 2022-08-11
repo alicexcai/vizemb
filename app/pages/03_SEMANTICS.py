@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 st.markdown("""
 # SEMANTICS
-*visualize the semantic properties of your data*
+*Explore semantic properties of items in your database.*
 """)
 
 if thisVizEmbData.df is None:

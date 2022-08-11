@@ -7,7 +7,7 @@ from sklearn.neighbors import NearestNeighbors
 
 st.markdown("""
 # COMPARISON
-*compare items in your database*
+*Compare and find similar items in your database.*
 """)
 
 if thisVizEmbData.df is None:

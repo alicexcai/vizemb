@@ -6,7 +6,7 @@ from streamlit_plotly_events import plotly_events
 
 st.markdown("""
 # NETWORK
-*visualize your data in a shared embedding space*
+*Explore connections between items in your database using a shared embedding space.*
 """)
 
 if thisVizEmbData.df is None:

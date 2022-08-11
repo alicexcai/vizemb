@@ -4,7 +4,7 @@ from modules import neurafutures
 
 st.markdown("""
 # STATISTICS
-*perform statistical analyses on your data*
+*Perform statistical analyses on your data.*
 """)
 
 if thisVizEmbData.df is None:

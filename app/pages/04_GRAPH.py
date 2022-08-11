@@ -4,7 +4,7 @@ import plotly.express as px
 
 st.markdown("""
 # GRAPH
-*visualize correlations in your data using graphs*
+*Visualize correlations in your data using various types of graphs.*
 """)
 
 if thisVizEmbData.df is None:

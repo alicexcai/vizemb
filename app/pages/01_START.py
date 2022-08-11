@@ -9,7 +9,7 @@ Load your database to get started. Make sure your database follows the specified
 
 # load database
 
-thisVizEmbData.project_name = st.text_input("Enter your project name:", thisVizEmbData.project_name)
+# thisVizEmbData.project_name = st.text_input("Enter your project name:", thisVizEmbData.project_name)
 uploaded_file = st.file_uploader("Upload database", type = ['csv']) # , 'xlsx', 'sqlite', 'db'])
 
 if uploaded_file:
