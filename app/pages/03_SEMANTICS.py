@@ -27,20 +27,26 @@ else:
 
         # get descriptions
 
-        items_df = thisVizEmbData.df.loc[thisVizEmbData.df["[title] TITLE"].isin(visualization_items)]
-        items_descriptions = {title : description for title, description in zip(items_df["[title] TITLE"], items_df["[sem] Description"])}
-        for title, description in items_descriptions.items():
-            with st.expander(title):
-                st.write(description)
-        items_descriptions_concat = " ".join(items_descriptions.values())
+        try:
 
-        # generate a word cloud image
+            items_df = thisVizEmbData.df.loc[thisVizEmbData.df["[title] TITLE"].isin(visualization_items)]
+            items_descriptions = {title : description for title, description in zip(items_df["[title] TITLE"], items_df["[sem] Description"])}
+            for title, description in items_descriptions.items():
+                with st.expander(title):
+                    st.write(description)
+            items_descriptions_concat = " ".join(items_descriptions.values())
+
+            # generate a word cloud image
+            
+            wordcloud = WordCloud(background_color=bg_color, colormap=color_map, max_words=max_word, max_font_size=max_font).generate(items_descriptions_concat)
+            fig, ax = plt.subplots()
+            plt.axis("off")
+            ax.imshow(wordcloud, interpolation='bilinear')
+            st.pyplot(fig)
         
-        wordcloud = WordCloud(background_color=bg_color, colormap=color_map, max_words=max_word, max_font_size=max_font).generate(items_descriptions_concat)
-        fig, ax = plt.subplots()
-        plt.axis("off")
-        ax.imshow(wordcloud, interpolation='bilinear')
-        st.pyplot(fig)
+        except:
+            
+            st.success("No description found for selected items.")
 
         
 

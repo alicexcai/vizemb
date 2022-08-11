@@ -51,14 +51,20 @@ else:
             st.write(thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == item1])
             datadict1 = thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == item1].to_dict()
             st.write({key: list(value.values())[0] for key, value in datadict1.items()})
-            img1path = thisVizEmbData.df.filter(regex="img").iloc[index1].values[0]
-            st.image(img1path)
+            try:
+                img1path = thisVizEmbData.df.filter(regex="img").iloc[index1].values[0]
+                st.image(img1path)
+            except:
+                pass
         with col2.expander(f"{item2} data"):
             st.write(thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == item2])
             datadict2 = thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == item2].to_dict()
             st.write({key: list(value.values())[0] for key, value in datadict2.items()})
-            img2path = thisVizEmbData.df.filter(regex="img").iloc[index1].values[0]
-            st.image(img2path)
+            try:
+                img2path = thisVizEmbData.df.filter(regex="img").iloc[index1].values[0]
+                st.image(img2path)
+            except:
+                pass
             
         percentile_df1 = [calculate_percentile(thisVizEmbData.df[prop][index1], prop) for prop in quant_properties]
         percentile_df2 = [calculate_percentile(thisVizEmbData.df[prop][index2], prop) for prop in quant_properties]
@@ -104,8 +110,11 @@ else:
         st.write(thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == selected_item])
         datadict = thisVizEmbData.df[thisVizEmbData.df["[title] TITLE"] == selected_item].to_dict()
         st.write({key: list(value.values())[0] for key, value in datadict.items()})
-        imgpath = thisVizEmbData.df.filter(regex="img").iloc[index].values[0]
-        st.image(imgpath)
+        try:
+            imgpath = thisVizEmbData.df.filter(regex="img").iloc[index].values[0]
+            st.image(imgpath)
+        except:
+            pass
 
     if st.button("Find similar items"):
         results = find_similar_items(selected_item, num_similar_items+1)

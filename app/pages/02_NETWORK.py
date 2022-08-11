@@ -70,4 +70,7 @@ else:
                 selected_itemdata_dict = {col: selected_itemdata[col].values[0] for col in selected_itemdata.columns}
                 st.write(selected_itemdata)
                 st.write(selected_itemdata_dict)
-                st.image(thisVizEmbData.df.filter(regex="img").iloc[selected_index].values[0])
+                try:
+                    st.image(thisVizEmbData.df.filter(regex="img").iloc[selected_index].values[0])
+                except:
+                    pass
