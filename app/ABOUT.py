@@ -1,9 +1,9 @@
 import streamlit as st
 
 st.markdown("""
-# NeuraFutures
+# VizEmb
 
-NeuraFutures Data Analaysis & Visualization Tool allows users to explore connections betewen items in any kind of database. The tool casts rich statical and semantic data into an embedding space and allows users to explore dimensions along which they want to visualize connections.
+VizEmb is a data analysis and visualization tool that allows users to explore connections betewen items in any kind of database. The tool casts rich statical and semantic data into an embedding space and allows users to explore dimensions along which they want to visualize connections.
 
 Examples of embedding space dimensions include semantics (text and natural language meaning), date / time, location, and other calculated metrics.
 

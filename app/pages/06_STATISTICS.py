@@ -1,6 +1,5 @@
 import streamlit as st
 from modules.VizEmb import *
-from modules import neurafutures
 
 st.markdown("""
 # STATISTICS
@@ -38,7 +37,3 @@ else:
                 }
                 
             st.write(statistics)
-
-    # generate batch statistics specific to NEURAFUTURES
-
-    neurafutures.neurafutures_batchstats(thisVizEmbData)
